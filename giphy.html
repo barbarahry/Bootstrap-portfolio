@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>GIPHY TIME</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+        crossorigin="anonymous">
+
+
+    <!-- Custom styles for this template -->
+    <link href="album.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+
+    <header>
+
+        <div class="navbar navbar-dark bg-dark box-shadow">
+            <div class="container d-flex justify-content-between">
+                <a href="#" class="navbar-brand d-flex align-items-center">
+
+                    <strong class=" btn-outline-success">GIPHY Time</strong>
+                </a>
+
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main role="main">
+
+
+            <div class="container">
+
+                <h1></h1>
+
+                <!-- Rendered Buttons will get Dumped Here  -->
+                <div id="buttons-view"></div>
+
+                <p class="lead text-muted ">Search your favorite topic.</p>
+                <form id="movie-form">
+                    <input type="text" id="movie-input">
+                    <br>
+                    <!-- Button triggers new movie to be added -->
+                    <input id="add-movie" type="submit" value="Add a Giphy" class=" btn btn-outline-success mt-3">
+                </form>
+                <hr>
+
+
+            </div>
+            <!-- end container  -->
+
+            <div id="row1" class="row"></div>
+            <div id="row2" class="row"></div>
+            <div id="row3" class="row"></div>
+
+        </main>
+    </div>
+
+    <footer class="text-muted">
+        <div class="container">
+            <p class="float-right">
+                <a href="portfolio.html" class="btn-outline-success">Back to Portfolio</a>
+            </p>
+
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+
+    ================================================== -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        // Initial array of topics
+        var topics = ["Blade Runner", "A Space Odyssey", "Metropolis", "Kurosawa"];
+
+        // Generic function for capturing the movie name from the data-attribute
+        function addGif() {
+            $("#row1").empty();
+            $("#row2").empty();
+            $("#row3").empty();
+            // Grabbing and storing the data-animal property value from the button
+            var topics = $(this).attr("data-name");
+
+            // Constructing a queryURL using the topics name
+            var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                topics + "&api_key=9IqbPf0sm4EmmwPz4InJGUIgVJ1QYVef&limit=9";
+
+
+
+            function makeRowsOfGifs(initial, final, nameOfRowId, results) {
+                for (var i = initial; i < final; i++) {
+
+                    // Creating and storing a div tag
+                    // var parentRow =  $("<div class='row'>");
+                    var parentDiv = $("<div class='col-md-4'>");
+                    var gifDiv = $("<div class='card btn-outline-success mb-4 '>");
+
+                    // Creating a paragraph tag with the result item's rating
+                    var p = $("<p>").text("Rating: " + results[i].rating);
+
+                    // Creating and storing an image tag
+                    var gifImage = $("<img>");
+                    gifImage.addClass("gif card-img-top");
+                    // Setting the src attribute of the image to a property pulled off the result item
+                    gifImage.attr("src", results[i].images.fixed_height_still.url);
+                    gifImage.attr("data-still", results[i].images.fixed_height_still.url);
+                    gifImage.attr("data-animate", results[i].images.fixed_height.url);
+                    gifImage.attr("data-state", "still");
+
+                    // Appending the paragraph and image tag to the animalDiv
+                    parentDiv.append(gifDiv);
+                    gifDiv.append(p);
+                    gifDiv.append(gifImage);
+                    $(nameOfRowId).append(parentDiv)
+
+
+                }
+            } // makeRowsOfGifs Function....
+
+            // Performing an AJAX request with the queryURL
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+                // After data comes back from the request
+                .then(function (response) {
+                    console.log(queryURL);
+
+                    console.log(response);
+                    // storing the data from the AJAX request in the results variable
+                    var results = response.data;
+
+
+                    makeRowsOfGifs(0, 3, "#row1", results);
+                    makeRowsOfGifs(3, 6, "#row2", results);
+                    makeRowsOfGifs(6, 9, "#row3", results);
+                });
+
+        }
+
+        // Function for displaying giphy buttons
+        function renderButtons() {
+
+            // Deleting the movies prior to adding new movies
+            // (this is necessary otherwise we will have repeat buttons)
+            $("#buttons-view").empty();
+
+            // Looping through the array of movies
+            for (var i = 0; i < topics.length; i++) {
+
+                // Then dynamicaly generating buttons for each movie in the array
+                // This code $("<button>") is all jQuery needs to create the start and end tag. (<button></button>)
+                var a = $("<button>");
+                // Adding a class of movie to our button
+                a.addClass("movie btn btn-outline-success ml-2 mt-4 mb-4");
+                // Adding a data-attribute
+                a.attr("data-name", topics[i]);
+                // Providing the initial button text
+                a.text(topics[i]);
+                // Adding the button to the HTML
+                $("#buttons-view").append(a);
+            }
+        }
+
+        // This function handles events where one button is clicked
+        $("#add-movie").on("click", function (event) {
+            // Preventing the buttons default behavior when clicked (which is submitting a form)
+            event.preventDefault();
+            // This line grabs the input from the textbox
+            var movie = $("#movie-input").val().trim();
+
+            // Adding the movie from the textbox to our array
+            topics.push(movie);
+
+            // Calling renderButtons which handles the processing of our movie array
+            renderButtons();
+
+
+        });
+
+        // Function for displaying the movie info
+        // We're adding a click event listener to all elements with the class "movie"
+        // We're adding the event listener to the document because it will work for dynamically generated elements
+        // $(".movies").on("click") will only add listeners to elements that are on the page at that time
+        $(document).on("click", ".movie", addGif);
+
+        // Calling the renderButtons function to display the intial buttons
+        renderButtons();
+
+
+        $(document).on("click", ".gif", function () {
+            // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
+            var state = $(this).attr("data-state");
+            // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+            // Then, set the image's data-state to animate
+            // Else set src to the data-still value
+            if (state === "still") {
+                $(this).attr("src", $(this).attr("data-animate"));
+                $(this).attr("data-state", "animate");
+            } else {
+                $(this).attr("src", $(this).attr("data-still"));
+                $(this).attr("data-state", "still");
+            }
+        }
+        );
+
+
+
+
+    </script>
+
+</body>
+
+</html>
